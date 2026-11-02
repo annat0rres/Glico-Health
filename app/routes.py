@@ -16,6 +16,7 @@ import math
 from flask import request, jsonify
 from sqlalchemy import func, select
 
+# guarda em memória os dados mais recentes para a interface de acompanhamento
 ultima_leitura = {
     "temperatura": "--",
     "status": "Aguardando leitura",
@@ -25,6 +26,7 @@ ultima = {"temperatura": None, "hora": None}
 FUSO_BRASILIA = timezone(timedelta(hours=-3))
 
 
+# persiste a temperatura recebida e atualiza os dados da última leitura exibidos no site.
 def _registrar_leitura_temperatura(valor):
     temperatura = float(valor)
     data_hora = datetime.now(FUSO_BRASILIA).replace(tzinfo=None)
@@ -39,6 +41,7 @@ def _registrar_leitura_temperatura(valor):
     ultima.update({"temperatura": temperatura, "hora": hora})
 
 
+# calcula o ITR diário como a diferença entre a maior e a menor temperatura de cada dia
 def _calcular_itr_diario(leituras, hoje):
     temperaturas_por_dia = {
         hoje - timedelta(days=offset): []
@@ -100,6 +103,7 @@ def home():
     hoje = datetime.now(FUSO_BRASILIA).date()
     inicio_periodo = datetime.combine(hoje - timedelta(days=6), time.min)
     fim_periodo = datetime.combine(hoje + timedelta(days=1), time.min)
+    # busca as leituras recentes do sensor para montar o gráfico semanal de ITR (na homepage)
     leituras_temperatura = db.session.scalars(
         select(LeituraTemperatura)
         .where(
@@ -240,6 +244,7 @@ def registroglicemia():
     )
 
 
+# exibe o acompanhamento do pé diabético e aceita uma leitura de temperatura em JSON
 @app.route("/pediabetico", methods=["GET", "POST"])
 @csrf.exempt
 def pediabetico():
@@ -265,7 +270,7 @@ def pediabetico():
         hora_temperatura=ultima["hora"],
     )
 
-
+# mostra na página a última leitura para que a interface atualize temperatura, horário e status
 @app.route("/pediabetico/atualizar", methods=["GET"])
 def atualizar_leitura_pediabetico():
     return jsonify(ultima_leitura)
@@ -289,7 +294,7 @@ def login():
     formLogin = LoginForm()
     if formLogin.validate_on_submit():
         if AuthenticationController.login(formLogin):
-            return redirect(url_for("home")) #vai para a PÁGINA INICIAL depois do login
+            return redirect(url_for("home")) #vai para a PÁGINA INICIAL depois do gin
         else:
             flash("Usuário ou senha incorretos.", "error")
 
@@ -554,8 +559,7 @@ def foto_perfil():
     return Response(usuario.foto_perfil, mimetype=usuario.foto_perfil_tipo or 'image/jpeg')
 
 
-# parte do esp
-
+# recebe temperatura via POST e retorna a última leitura via GET.
 @app.route("/temperatura", methods=["GET", "POST"])
 @csrf.exempt
 def receber_temperatura():
@@ -565,7 +569,7 @@ def receber_temperatura():
         return jsonify(ultima)
 
     dados = request.get_json(silent=True) or {}
-    print("Dados recebidos:", dados)  # Adicione esta linha para depuração
+    print("Dados recebidos:", dados) 
     temp = dados.get("temperatura")
     if temp is None:
         return {"erro": "campo 'temperatura' ausente"}, 400
