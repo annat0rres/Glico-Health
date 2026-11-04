@@ -84,6 +84,18 @@ background:
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.card-custom .legenda-itr li {
+  color: #4a3e56 !important;
+}
+
+.card-custom .legenda-itr {
+  font-size: 0.75rem;
+}
+
+.card-custom .titulo-grafico {
+  color: #8d829e !important;
+}
+
 .barra-paciente {
   display: flex;
   min-height: 44px;

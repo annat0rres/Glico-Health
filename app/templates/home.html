@@ -55,7 +55,7 @@
 
           <div class="card-custom p-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold mb-0" style="color: #4a3e56;">Nível glicêmico</h6>
+              <h6 class="titulo-grafico fw-bold mb-0">Níveis de glicemia</h6>
 
               <div class="btn-group btn-group-sm" role="group" aria-label="Filtro do Gráfico">
                 <button type="button" class="btn btn-outline-purple active"
@@ -72,11 +72,17 @@
           </div>
           <div class="card-custom p-3">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold mb-0" style="color: #4a3e56;">ITR do pé diabético</h6>
+              <h6 class="titulo-grafico fw-bold mb-0">Acompanhamento do Pé diabético</h6>
             </div>
             <div style="position: relative; height: 180px; width: 100%;">
               <canvas id="graficoPeDiabetico"></canvas>
             </div>
+            <ul class="legenda-itr list-unstyled d-flex flex-wrap justify-content-center gap-3 mt-3 mb-0 small" aria-label="Legenda do gráfico do pé diabético">
+              <li class="d-flex align-items-center gap-2"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: rgba(101, 90, 124, 0.85);"></span> Abaixo de 1,8 °C</li>
+              <li class="d-flex align-items-center gap-2"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: rgba(245, 204, 76, 0.9);"></span> De 1,8 a 2,2 °C</li>
+              <li class="d-flex align-items-center gap-2"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: rgba(255, 188, 220, 0.9);"></span> Acima de 2,2 °C</li>
+              <li class="d-flex align-items-center gap-2"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: rgba(190, 190, 190, 0.6);"></span> Sem leitura</li>
+            </ul>
           </div>
 
         </div>
