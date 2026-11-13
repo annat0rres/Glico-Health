@@ -19,7 +19,7 @@ class Config:
         # Caso prefira usar as variáveis separadas do Aiven ou Local:
         db_host = os.getenv("DB_HOST", "localhost")
         db_user = os.getenv("DB_USER", "root")
-        db_password = os.getenv("DB_PASSWORD", "")
+        db_password = os.getenv("DB_PASSWORD", "labinfo")
         db_name = os.getenv("DB_NAME", "glicohealthbd")
         db_port = os.getenv("DB_PORT", "3306")
 
