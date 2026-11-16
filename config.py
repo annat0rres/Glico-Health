@@ -49,7 +49,7 @@ class Config:
         # aceita DB_USERNAME para PostgreSQL e mantém DB_USER para configurações existentes.
         db_host = os.getenv("DB_HOST", "localhost")
         db_user = os.getenv("DB_USERNAME") or os.getenv("DB_USER", "root")
-        db_password = os.getenv("DB_PASSWORD", "")
+        db_password = os.getenv("DB_PASSWORD", "labinfo")
         db_name = os.getenv("DB_NAME", "glicohealthbd")
         default_port = "3306" if current_database == "mysql" else "5432"
         db_port = os.getenv("DB_PORT") or default_port
