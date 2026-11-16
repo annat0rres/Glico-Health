@@ -12,15 +12,17 @@
 <body class="p-0 m-0 bg-light">
 
     <main id="questionario" class="flex-grow-1 d-flex flex-column justify-content-between py-4">
+        {% if show_back_button %}
         <a href="{{ url_for('home') }}" class="btn-voltar-associacao" aria-label="Voltar para a tela inicial">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
         </a>
+        {% endif %}
         
         <div class="container my-auto">
             <div class="row justify-content-center">
-                <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5" style="max-width: 400px;">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
                     
-                    <section class="conteudoQuest px-2">
+                    <section class="conteudoQuest conteudoAssociacao px-2">
                         <div class="tituloQuest mb-4">
                             <h1 class="h3 fw-bold mb-3">Antes de tudo...</h1>
                             <div class="barraProgresso">
@@ -32,7 +34,7 @@
                             <p class="pergunta mb-4 fs-5">Sobre o paciente a acompanhar...</p>
                             
                             <div id="cadastroQuest">
-                                <form id="associarPacienteForm" action="{{ url_for('quest_verificar_paciente') }}" method="POST" novalidate>
+                                <form id="associarPacienteForm" class="form-associar-paciente" action="{{ form_action }}" method="POST" novalidate>
                                     {{ form.hidden_tag() }}
                                     {% if is_responsible %}
                                     <div class="mb-3">

@@ -202,6 +202,20 @@ body {
     flex-direction: column;
 }
 
+#cadastroQuest form.form-associar-paciente {
+    max-width: 100%;
+}
+
+.conteudoAssociacao {
+    max-width: 550px;
+    align-items: center;
+}
+
+.conteudoAssociacao > .tituloQuest,
+.conteudoAssociacao > .areaPergunta {
+    width: 100%;
+}
+
 #cadastro form p,
 #cadastroQuest form p,
 #cadastroQuest form .mb-3 {

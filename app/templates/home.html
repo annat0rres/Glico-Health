@@ -46,7 +46,7 @@
               <button id="abrirTrocaPaciente" class="btn-paciente-acao" type="button" {% if not pacientes_cuidados %}disabled{% endif %}>
                 <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Trocar
               </button>
-              <a class="btn-paciente-acao btn-paciente-adicionar" href="{{ url_for('quest_verificar_paciente') }}">
+              <a class="btn-paciente-acao btn-paciente-adicionar" href="{{ url_for('quest_verificar_paciente', origem='home') }}">
                 <i class="bi bi-plus-lg" aria-hidden="true"></i> Adicionar
               </a>
             </div>

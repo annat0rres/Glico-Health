@@ -207,7 +207,9 @@ def registroglicemia():
 
     if pode_escolher_paciente and not pacientes_cuidados:
         flash("Associe um paciente antes de registrar uma glicemia.", "warning")
-        return redirect(url_for("quest_verificar_paciente"))
+        return redirect(
+            url_for("quest_verificar_paciente", origem="home")
+        )
 
     if request.method == "POST":
         sucesso = UsuarioController.registrar_glicemia(
@@ -379,7 +381,7 @@ def quest_tipo_cuidador():
             )
         elif tipo_cuidador == "familiar":
             return redirect(
-                url_for("quest_verificar_paciente", tipo_cuidador=tipo_cuidador)
+                url_for("quest_verificar_paciente", origem="questionario")
             )
     return render_template("tipo_cuidador.html")
 
@@ -422,6 +424,7 @@ def quest_verificar_paciente():
             flash(mensagem, "error")
 
     responsavel = UsuarioController.buscar_responsavel_login() if papel_ativo == "responsavel" else None
+    origem = request.args.get("origem")
     relacao = session.get("relacao_responsavel", "")
     relacoes_disponiveis = []
     if responsavel:
@@ -437,6 +440,11 @@ def quest_verificar_paciente():
         is_responsible=bool(responsavel),
         relacao_responsavel=relacao,
         relacoes_disponiveis=relacoes_disponiveis,
+        show_back_button=origem == "home",
+        form_action=url_for(
+            "quest_verificar_paciente",
+            origem=origem if origem in {"home", "questionario"} else None,
+        ),
     )
 
 @app.route("/validar_profissional", methods=["GET", "POST"])
@@ -446,7 +454,9 @@ def validar_profissional():
         conselho = formValidarProf.conselhoprofissional.data
         registro = formValidarProf.registroprofissional.data
         UsuarioController.salvar_dados_profissional(conselho, registro)
-        return redirect(url_for("quest_verificar_paciente"))
+        return redirect(
+            url_for("quest_verificar_paciente", origem="questionario")
+        )
     
     return render_template("validar_profissional.html", form=formValidarProf)
 
@@ -463,7 +473,9 @@ def quest_responsavel():
             flash("Não foi possível salvar os dados do responsável.", "error")
             return redirect(url_for("quest_responsavel"))
         session["relacao_responsavel"] = relacao
-        return redirect(url_for("quest_verificar_paciente"))
+        return redirect(
+            url_for("quest_verificar_paciente", origem="questionario")
+        )
     return render_template("quest_responsavel.html")
 
 

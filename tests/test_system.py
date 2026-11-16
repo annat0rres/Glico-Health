@@ -291,7 +291,10 @@ class TestesDeSistema(unittest.TestCase):
         self.assertEqual(resposta_papel.status_code, 302)
         self.assertEqual(resposta_papel.headers["Location"], "/questionario/tipo_cuidador")
         self.assertEqual(resposta_tipo.status_code, 302)
-        self.assertIn("/verificar_paciente", resposta_tipo.headers["Location"])
+        self.assertEqual(
+            resposta_tipo.headers["Location"],
+            "/verificar_paciente?origem=questionario",
+        )
         with app.app_context():
             cuidador = db.session.query(Cuidador).filter_by(
                 id_usuario=usuario_id
@@ -319,7 +322,10 @@ class TestesDeSistema(unittest.TestCase):
             )
 
         self.assertEqual(resposta.status_code, 302)
-        self.assertEqual(resposta.headers["Location"], "/verificar_paciente")
+        self.assertEqual(
+            resposta.headers["Location"],
+            "/verificar_paciente?origem=questionario",
+        )
 
     def test_validacao_profissional_rejeita_registro_malformado(self):
         resposta = self.client.post(
@@ -393,6 +399,41 @@ class TestesDeSistema(unittest.TestCase):
 
         self.assertEqual(resposta.status_code, 200)
         self.assertIn(b"Associar Paciente", resposta.data)
+        self.assertNotIn(b"btn-voltar-associacao", resposta.data)
+
+    def test_pagina_de_associacao_mostra_voltar_quando_aberta_pela_home(self):
+        self.definir_sessao(papel="cuidador")
+        with patch.object(
+            routes.UsuarioController,
+            "obter_papel_ativo",
+            return_value="cuidador",
+        ):
+            resposta = self.client.get("/verificar_paciente?origem=home")
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn(b"btn-voltar-associacao", resposta.data)
+        self.assertIn(
+            b'action="/verificar_paciente?origem=home"',
+            resposta.data,
+        )
+
+    def test_pagina_de_associacao_oculta_voltar_no_onboarding(self):
+        self.definir_sessao(papel="cuidador")
+        with patch.object(
+            routes.UsuarioController,
+            "obter_papel_ativo",
+            return_value="cuidador",
+        ):
+            resposta = self.client.get(
+                "/verificar_paciente?origem=questionario"
+            )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertNotIn(b"btn-voltar-associacao", resposta.data)
+        self.assertIn(
+            b'action="/verificar_paciente?origem=questionario"',
+            resposta.data,
+        )
 
     def test_pagina_de_associacao_redireciona_papel_nao_autorizado(self):
         with patch.object(
@@ -433,7 +474,10 @@ class TestesDeSistema(unittest.TestCase):
         )
 
         self.assertEqual(resposta.status_code, 302)
-        self.assertEqual(resposta.headers["Location"], "/verificar_paciente")
+        self.assertEqual(
+            resposta.headers["Location"],
+            "/verificar_paciente?origem=questionario",
+        )
         with self.client.session_transaction() as sessao:
             self.assertEqual(sessao["relacao_responsavel"], "Mãe")
         with app.app_context():
