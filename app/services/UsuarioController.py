@@ -118,7 +118,7 @@ class UsuarioController:
                         VinculocuidadorPaciente(
                             id_cuidador=cuidador.id,
                             id_paciente=paciente.id,
-                            criado_por_cuidador=1,
+                            criado_por_cuidador=True,
                             data_associacao=datetime.now(),
                             status="Pendente",
                         )
@@ -139,7 +139,7 @@ class UsuarioController:
                             id_paciente=paciente.id,
                             relacao=relacao,
                             status=VinculoresponsavelPacienteStatus.ATIVO,
-                            criado_por_responsavel=1,
+                            criado_por_responsavel=True,
                             data_associacao=datetime.now(),
                         )
                     )
@@ -459,7 +459,7 @@ class UsuarioController:
                     VinculocuidadorPaciente(
                         id_cuidador=cuidador.id,
                         id_paciente=paciente.id,
-                        criado_por_cuidador=1,
+                        criado_por_cuidador=True,
                         data_associacao=datetime.now(),
                         status="Pendente",
                     )
@@ -471,7 +471,7 @@ class UsuarioController:
                         id_paciente=paciente.id,
                         relacao=relacao,
                         status=VinculoresponsavelPacienteStatus.ATIVO,
-                        criado_por_responsavel=1,
+                        criado_por_responsavel=True,
                         data_associacao=datetime.now(),
                     )
                 )

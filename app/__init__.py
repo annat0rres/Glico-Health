@@ -14,6 +14,9 @@ csrf = CSRFProtect(app)
 
 def criar_banco():
     import os
+    if Config.CURRENT_DATABASE != "mysql":
+        return
+
     # Mantém o os.getenv, mas com números limpos como padrão para não quebrar
     host = os.getenv("DB_HOST", "localhost")
     user = os.getenv("DB_USER", "root")
@@ -45,7 +48,12 @@ criar_banco()
 
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migration_directory = (
+    "migrations_postgresql"
+    if Config.CURRENT_DATABASE == "postgresql"
+    else "migrations"
+)
+migrate = Migrate(app, db, directory=migration_directory)
 
 from app import routes
 from app import modelos

@@ -2,8 +2,7 @@ from typing import Optional
 import datetime
 import enum
 
-from sqlalchemy import CHAR, Date, DateTime, Enum, ForeignKeyConstraint, Index, Integer, String, text, Text, Time, DECIMAL, LargeBinary
-from sqlalchemy.dialects.mysql import TINYINT, LONGBLOB
+from sqlalchemy import Boolean, CHAR, Date, DateTime, Enum, ForeignKeyConstraint, Index, Integer, String, text, Text, Time, DECIMAL, LargeBinary
 from app import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -33,10 +32,10 @@ class Usuario(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     username: Mapped[str] = mapped_column(String(64), nullable=False)
-    remember_me: Mapped[int] = mapped_column(TINYINT, nullable=False)
+    remember_me: Mapped[bool] = mapped_column(Boolean, nullable=False)
     email: Mapped[Optional[str]] = mapped_column(String(64), unique=True)
     passw_hash: Mapped[Optional[str]] = mapped_column(String(256))
-    foto_perfil: Mapped[Optional[bytes]] = mapped_column(LONGBLOB)
+    foto_perfil: Mapped[Optional[bytes]] = mapped_column(LargeBinary)
     foto_perfil_tipo: Mapped[Optional[str]] = mapped_column(String(50))
 
     cuidador: Mapped[list['Cuidador']] = relationship('Cuidador', back_populates='usuario')
@@ -106,7 +105,7 @@ class VinculocuidadorPaciente(Base):
 
     id_cuidador: Mapped[int] = mapped_column(Integer, primary_key=True)
     id_paciente: Mapped[int] = mapped_column(Integer, primary_key=True)
-    criado_por_cuidador: Mapped[int] = mapped_column(TINYINT, nullable=False, server_default=text("'0'"))
+    criado_por_cuidador: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     data_associacao: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[Optional[str]] = mapped_column(String(20), server_default=text("'Pendente'"))
 
@@ -126,7 +125,7 @@ class VinculoresponsavelPaciente(Base):
     id_paciente: Mapped[int] = mapped_column(Integer, primary_key=True)
     relacao: Mapped[Optional[str]] = mapped_column(String(30))
     status: Mapped[Optional[VinculoresponsavelPacienteStatus]] = mapped_column(Enum(VinculoresponsavelPacienteStatus, values_callable=lambda cls: [member.value for member in cls]))
-    criado_por_responsavel: Mapped[Optional[int]] = mapped_column(TINYINT, server_default=text("'0'"))
+    criado_por_responsavel: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("false"))
     data_associacao: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
 
     paciente: Mapped['Paciente'] = relationship('Paciente', back_populates='vinculoresponsavel_paciente')
@@ -146,7 +145,7 @@ class registro_glicemico(Base):
     __tablename__ = 'registro_glicemico'
     __table_args__ = (
         ForeignKeyConstraint(['id_usuario'], ['usuario.id'], name='fk_usuario_id'),
-        Index('fk_usuario_id_idx', 'id_usuario')
+        Index('fk_evento_usuario_idx', 'id_usuario')
     )
 
     id: Mapped[int] = mapped_column(Integer,primary_key=True,autoincrement=True)

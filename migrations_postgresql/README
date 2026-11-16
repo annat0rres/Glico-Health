@@ -1,0 +1,18 @@
+PostgreSQL/Supabase migrations
+==============================
+
+When CURRENT_DATABASE=postgresql (or DATABASE_URL uses a PostgreSQL scheme),
+Flask-Migrate uses this directory. The existing migrations/ directory remains
+the MySQL migration history.
+
+For a new, empty Supabase database, apply the baseline with:
+
+    flask --app run db upgrade
+
+Create later PostgreSQL migrations with:
+
+    flask --app run db migrate -m "description"
+
+Do not run the PostgreSQL baseline against a database containing application
+tables. Check the Supabase Tables page first; this project does not inspect or
+clear the remote database automatically.
