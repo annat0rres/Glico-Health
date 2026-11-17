@@ -188,4 +188,9 @@ class LeituraTemperatura(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     temperatura: Mapped[DECIMAL] = mapped_column(DECIMAL(5, 2), nullable=False)
+    dedao: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL(5, 2))
+    metatarso_3: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL(5, 2))
+    metatarso_5: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL(5, 2))
+    meio_pe: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL(5, 2))
+    calcanhar: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL(5, 2))
     data_hora: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)

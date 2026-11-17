@@ -4,7 +4,8 @@
 #include <math.h> // pra usar o log 
 
 // configurações da rede 
-#include "secrets.h"
+const char* SECRET_SSID = "Hellen";
+const char* SECRET_PASS = "vivi@0204";
 
 // url do vercel (página do pé diabético)
 const char* serverName = "https://glico-health.vercel.app/pediabetico";
@@ -26,7 +27,7 @@ const SensorNTC sensores[] = {
   {"metatarso_3", "3º metatarso", 6},
   {"metatarso_5", "5º metatarso", 7},
   {"meio_pe", "Meio do pé", 5},
-  {"calcanhar", "Calcanhar", 15}
+  {"calcanhar", "Calcanhar", 8}
 };
 const size_t quantidadeSensores = sizeof(sensores) / sizeof(sensores[0]);
 
@@ -98,15 +99,25 @@ void loop() {
     http.addHeader("Content-Type", "application/json");
 
     float temperaturas[quantidadeSensores];
+    float maiorTemp = -999.0; // começa bem baixo para ser substituído na primeira leitura
+    float menorTemp = 999.0;  // começa bem alto para ser substituído na primeira leitura
     bool leituraValida = true;
+
     for (size_t i = 0; i < quantidadeSensores; i++) {
       if (!lerTemperaturaNTC(sensores[i].pino, temperaturas[i])) {
         Serial.printf("Leitura inválida no sensor %s (GPIO %d)\n", sensores[i].nome, sensores[i].pino);
         leituraValida = false;
+      } else {
+        // atualiza a maior e a menor temperatura encontradas
+        if (temperaturas[i] > maiorTemp) maiorTemp = temperaturas[i];
+        if (temperaturas[i] < menorTemp) menorTemp = temperaturas[i];
       }
     }
 
     if (leituraValida) {
+      // calcula a diferença entre a maior e a menor temperatura
+      float diferencaTemp = maiorTemp - menorTemp;
+
       // monta o payload em formato JSON
       String jsonPayload = "{\"temperatura\":" + String(temperaturas[0], 2) + ",\"sensores\":{";
       for (size_t i = 0; i < quantidadeSensores; i++) {
@@ -123,7 +134,8 @@ void loop() {
       int httpResponseCode = http.POST(jsonPayload);
 
       if (httpResponseCode >= 200 && httpResponseCode < 300) {
-        Serial.printf("Cinco sensores enviados | Dedão: %.2f °C | Código HTTP: %d\n", temperaturas[0], httpResponseCode);
+        Serial.printf("Cinco sensores enviados | Diferença (Máx - Mín): %.2f °C (Máx: %.2f °C / Mín: %.2f °C) | Código HTTP: %d\n",
+                      diferencaTemp, maiorTemp, menorTemp, httpResponseCode);
       } else if (httpResponseCode > 0) {
         String resposta = http.getString();
         Serial.printf("Erro HTTP %d: %s\n", httpResponseCode, resposta.c_str());

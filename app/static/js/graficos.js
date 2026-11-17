@@ -104,7 +104,7 @@
     return '#655A7C';
   });
 
-  new Chart(ctxPeDiabetico, {
+  const graficoPeDiabetico = new Chart(ctxPeDiabetico, {
     type: 'bar',
     data: {
       labels: itrDias.map(dia => dia.label),
@@ -133,4 +133,34 @@
       }
     }
   });
+
+  async function atualizarItrPeDiabetico() {
+    try {
+      const resposta = await fetch('/home/itr-atualizar');
+      if (!resposta.ok) return;
+
+      const dias = await resposta.json();
+      const valores = dias.map(dia => dia.itr);
+      graficoPeDiabetico.data.labels = dias.map(dia => dia.label);
+      graficoPeDiabetico.data.datasets[0].data = valores;
+      graficoPeDiabetico.data.datasets[0].backgroundColor = valores.map(valor => {
+        if (valor === null) return 'rgba(190, 190, 190, 0.35)';
+        if (valor > 2.2) return 'rgba(255, 188, 220, 0.9)';
+        if (valor >= 1.8) return 'rgba(245, 204, 76, 0.9)';
+        return 'rgba(101, 90, 124, 0.85)';
+      });
+      graficoPeDiabetico.data.datasets[0].borderColor = valores.map(valor => {
+        if (valor === null) return 'rgba(190, 190, 190, 0.35)';
+        if (valor > 2.2) return '#d895b5';
+        if (valor >= 1.8) return '#d1aa27';
+        return '#655A7C';
+      });
+      graficoPeDiabetico.update();
+    } catch (erro) {
+      // mantém o último ITR exibido caso o servidor esteja temporariamente indisponível
+    }
+  }
+
+  atualizarItrPeDiabetico();
+  window.setInterval(atualizarItrPeDiabetico, 10000);
   }

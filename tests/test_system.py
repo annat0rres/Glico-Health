@@ -750,6 +750,16 @@ class TestesDeSistema(unittest.TestCase):
         with app.app_context():
             leitura_salva = db.session.query(LeituraTemperatura).one()
             self.assertEqual(float(leitura_salva.temperatura), 36.1)
+            self.assertEqual(float(leitura_salva.dedao), 36.1)
+            self.assertEqual(float(leitura_salva.metatarso_3), 36.2)
+            self.assertEqual(float(leitura_salva.metatarso_5), 36.3)
+            self.assertEqual(float(leitura_salva.meio_pe), 36.4)
+            self.assertEqual(float(leitura_salva.calcanhar), 36.5)
+
+        resposta_itr = self.client.get("/home/itr-atualizar")
+        self.assertEqual(resposta_itr.status_code, 200)
+        itr_hoje = resposta_itr.get_json()[-1]["itr"]
+        self.assertEqual(itr_hoje, 0.4)
 
     def test_envio_dos_sensores_rejeita_leitura_incompleta(self):
         leituras_invalidas = (

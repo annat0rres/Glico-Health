@@ -39,7 +39,19 @@ def _registrar_leitura_temperatura(valor, sensores=None):
     temperatura = float(valor)
     data_hora = datetime.now(FUSO_BRASILIA).replace(tzinfo=None)
     hora = data_hora.strftime("%d/%m/%Y %H:%M:%S")
-    db.session.add(LeituraTemperatura(temperatura=temperatura, data_hora=data_hora))
+    dados_sensor = {
+        sensor: float(sensores[sensor]) if sensores else None
+        for sensor in SENSORES_PE
+    }
+    db.session.add(LeituraTemperatura(
+        temperatura=temperatura,
+        dedao=dados_sensor["dedao"],
+        metatarso_3=dados_sensor["metatarso_3"],
+        metatarso_5=dados_sensor["metatarso_5"],
+        meio_pe=dados_sensor["meio_pe"],
+        calcanhar=dados_sensor["calcanhar"],
+        data_hora=data_hora,
+    ))
     db.session.commit()
     sensores_exibidos = {sensor: "--" for sensor in SENSORES_PE}
     if sensores is None:
@@ -64,7 +76,19 @@ def _calcular_itr_diario(leituras, hoje):
     for leitura in leituras:
         dia = leitura.data_hora.date()
         if dia in temperaturas_por_dia:
-            temperaturas_por_dia[dia].append(float(leitura.temperatura))
+            valores_sensor = [
+                getattr(leitura, sensor)
+                for sensor in SENSORES_PE
+            ]
+            valores_validos = [
+                float(valor)
+                for valor in valores_sensor
+                if valor is not None
+            ]
+            if valores_validos:
+                temperaturas_por_dia[dia].extend(valores_validos)
+            else:
+                temperaturas_por_dia[dia].append(float(leitura.temperatura))
 
     return [
         {
@@ -74,6 +98,21 @@ def _calcular_itr_diario(leituras, hoje):
         }
         for dia, temperaturas in temperaturas_por_dia.items()
     ]
+
+
+def _buscar_itr_diario():
+    hoje = datetime.now(FUSO_BRASILIA).date()
+    inicio_periodo = datetime.combine(hoje - timedelta(days=6), time.min)
+    fim_periodo = datetime.combine(hoje + timedelta(days=1), time.min)
+    leituras_temperatura = db.session.scalars(
+        select(LeituraTemperatura)
+        .where(
+            LeituraTemperatura.data_hora >= inicio_periodo,
+            LeituraTemperatura.data_hora < fim_periodo,
+        )
+        .order_by(LeituraTemperatura.data_hora)
+    ).all()
+    return _calcular_itr_diario(leituras_temperatura, hoje)
 
 
 @app.route("/")
@@ -114,19 +153,8 @@ def home():
         session.pop("paciente_visualizado_id", None)
         registros_glicemicos = UsuarioController.buscar_registros_glicemia_login()
 
-    hoje = datetime.now(FUSO_BRASILIA).date()
-    inicio_periodo = datetime.combine(hoje - timedelta(days=6), time.min)
-    fim_periodo = datetime.combine(hoje + timedelta(days=1), time.min)
     # busca as leituras recentes do sensor para montar o gráfico semanal de ITR (na homepage)
-    leituras_temperatura = db.session.scalars(
-        select(LeituraTemperatura)
-        .where(
-            LeituraTemperatura.data_hora >= inicio_periodo,
-            LeituraTemperatura.data_hora < fim_periodo,
-        )
-        .order_by(LeituraTemperatura.data_hora)
-    ).all()
-    itr_diario = _calcular_itr_diario(leituras_temperatura, hoje)
+    itr_diario = _buscar_itr_diario()
 
     eventos_calendario = UsuarioController.buscar_eventos_calendario_login()
     return render_template(
@@ -306,6 +334,11 @@ def pediabetico():
 @app.route("/pediabetico/atualizar", methods=["GET"])
 def atualizar_leitura_pediabetico():
     return jsonify(ultima_leitura)
+
+
+@app.route("/home/itr-atualizar", methods=["GET"])
+def atualizar_itr_diario():
+    return jsonify(_buscar_itr_diario())
 
 
 @app.route("/cadastro", methods=["GET", "POST"])
