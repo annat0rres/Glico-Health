@@ -17,8 +17,16 @@ from flask import request, jsonify
 from sqlalchemy import func, select
 
 # guarda em memória os dados mais recentes para a interface de acompanhamento
+SENSORES_PE = {
+    "dedao": "Dedão",
+    "metatarso_3": "3º metatarso",
+    "metatarso_5": "5º metatarso",
+    "meio_pe": "Meio do pé",
+    "calcanhar": "Calcanhar",
+}
 ultima_leitura = {
     "temperatura": "--",
+    "sensores": {sensor: "--" for sensor in SENSORES_PE},
     "status": "Aguardando leitura",
     "hora": "--",
 }
@@ -27,14 +35,20 @@ FUSO_BRASILIA = timezone(timedelta(hours=-3))
 
 
 # persiste a temperatura recebida e atualiza os dados da última leitura exibidos no site.
-def _registrar_leitura_temperatura(valor):
+def _registrar_leitura_temperatura(valor, sensores=None):
     temperatura = float(valor)
     data_hora = datetime.now(FUSO_BRASILIA).replace(tzinfo=None)
     hora = data_hora.strftime("%d/%m/%Y %H:%M:%S")
     db.session.add(LeituraTemperatura(temperatura=temperatura, data_hora=data_hora))
     db.session.commit()
+    sensores_exibidos = {sensor: "--" for sensor in SENSORES_PE}
+    if sensores is None:
+        sensores_exibidos["dedao"] = temperatura
+    else:
+        sensores_exibidos.update(sensores)
     ultima_leitura.update({
         "temperatura": temperatura,
+        "sensores": sensores_exibidos,
         "status": "Leitura recebida",
         "hora": hora,
     })
@@ -252,18 +266,34 @@ def registroglicemia():
 def pediabetico():
     if request.method == "POST":
         dados = request.get_json(silent=True)
-        if not isinstance(dados, dict) or "temperatura" not in dados:
-            return jsonify(sucesso=False, erro="Campo 'temperatura' ausente."), 400
+        if not isinstance(dados, dict):
+            return jsonify(sucesso=False, erro="Dados de temperatura ausentes."), 400
 
-        try:
-            temperatura = float(dados["temperatura"])
-        except (TypeError, ValueError):
-            return jsonify(sucesso=False, erro="Temperatura inválida."), 400
+        sensores = dados.get("sensores")
+        if sensores is not None:
+            if not isinstance(sensores, dict) or set(sensores) != set(SENSORES_PE):
+                return jsonify(sucesso=False, erro="Envie leituras válidas para os cinco sensores."), 400
+
+            try:
+                sensores = {sensor: float(sensores[sensor]) for sensor in SENSORES_PE}
+            except (TypeError, ValueError):
+                return jsonify(sucesso=False, erro="Leitura de sensor inválida."), 400
+
+            if not all(math.isfinite(valor) for valor in sensores.values()):
+                return jsonify(sucesso=False, erro="Leitura de sensor inválida."), 400
+            temperatura = sensores["dedao"]
+        elif "temperatura" in dados:
+            try:
+                temperatura = float(dados["temperatura"])
+            except (TypeError, ValueError):
+                return jsonify(sucesso=False, erro="Temperatura inválida."), 400
+        else:
+            return jsonify(sucesso=False, erro="Campo 'temperatura' ausente."), 400
 
         if not math.isfinite(temperatura):
             return jsonify(sucesso=False, erro="Temperatura inválida."), 400
 
-        _registrar_leitura_temperatura(temperatura)
+        _registrar_leitura_temperatura(temperatura, sensores)
         return jsonify(sucesso=True), 200
 
     return render_template(

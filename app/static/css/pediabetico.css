@@ -187,9 +187,16 @@ body {
   left: 30%;
 }
 
-.marker-antepe {
+.marker-metatarso-3 {
   top: 31%;
   left: 35%;
+  background: #ff8dbb;
+  box-shadow: 0 0 0 5px rgba(255, 141, 187, 0.2);
+}
+
+.marker-metatarso-5 {
+  top: 36%;
+  left: 67%;
   background: #ff8dbb;
   box-shadow: 0 0 0 5px rgba(255, 141, 187, 0.2);
 }

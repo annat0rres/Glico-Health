@@ -72,6 +72,7 @@ class TestesDeSistema(unittest.TestCase):
 
         routes.ultima_leitura.update(
             temperatura="--",
+            sensores={sensor: "--" for sensor in routes.SENSORES_PE},
             status="Aguardando leitura",
             hora="--",
         )
@@ -718,6 +719,56 @@ class TestesDeSistema(unittest.TestCase):
             resposta_status.get_json()["status"],
             "Leitura recebida",
         )
+
+    def test_envio_dos_cinco_sensores_atualiza_a_pagina(self):
+        sensores = {
+            "dedao": 36.1,
+            "metatarso_3": 36.2,
+            "metatarso_5": 36.3,
+            "meio_pe": 36.4,
+            "calcanhar": 36.5,
+        }
+
+        resposta = self.client.post("/pediabetico", json={"sensores": sensores})
+
+        self.assertEqual(resposta.status_code, 200)
+        leitura = self.client.get("/pediabetico/atualizar").get_json()
+        self.assertEqual(leitura["temperatura"], 36.1)
+        self.assertEqual(leitura["sensores"], sensores)
+
+        pagina = self.client.get("/pediabetico").get_data(as_text=True)
+        for campo in (
+            "sensor-dedao",
+            "sensor-metatarso-3",
+            "sensor-metatarso-5",
+            "sensor-meio-pe",
+            "sensor-calcanhar",
+        ):
+            self.assertIn(campo, pagina)
+        self.assertIn("36.5 °C", pagina)
+
+        with app.app_context():
+            leitura_salva = db.session.query(LeituraTemperatura).one()
+            self.assertEqual(float(leitura_salva.temperatura), 36.1)
+
+    def test_envio_dos_sensores_rejeita_leitura_incompleta(self):
+        leituras_invalidas = (
+            {"dedao": 36.1},
+            {
+                "dedao": 36.1,
+                "metatarso_3": 36.2,
+                "metatarso_5": 36.3,
+                "meio_pe": 36.4,
+                "calcanhar": "quente",
+            },
+        )
+
+        for sensores in leituras_invalidas:
+            with self.subTest(sensores=sensores):
+                resposta = self.client.post("/pediabetico", json={"sensores": sensores})
+
+                self.assertEqual(resposta.status_code, 400)
+                self.assertFalse(resposta.get_json()["sucesso"])
 
     def test_envio_de_temperatura_rejeita_valores_ausentes_ou_invalidos(self):
         dados_enviados = ({}, {"temperatura": "quente"}, {"temperatura": "inf"})

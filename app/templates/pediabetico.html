@@ -36,22 +36,27 @@
                                 <div class="pe-foot-map">
                                     <img src="{{ url_for('static', filename='img/moldepe.png') }}" alt="Molde do pé para acompanhamento diabético" class="pe-foot-image">
                                     <span class="pe-foot-marker marker-dedao" aria-label="Dedão"></span>
-                                    <span class="pe-foot-marker marker-antepe" aria-label="Antepé"></span>
+                                    <span class="pe-foot-marker marker-metatarso-3" aria-label="3º metatarso"></span>
+                                    <span class="pe-foot-marker marker-metatarso-5" aria-label="5º metatarso"></span>
                                     <span class="pe-foot-marker marker-meio" aria-label="Meio do pé"></span>
                                     <span class="pe-foot-marker marker-calcanhar" aria-label="Calcanhar"></span>
                                 </div>
                             </div>
-                            <p class="pe-foot-caption">Os marcadores serão atualizados quando os dados do protótipo estiverem disponíveis.</p>
+                            <p class="pe-foot-caption">Leituras dos cinco sensores NTC posicionados na palmilha.</p>
                         </section>
                         <aside class="pe-status-card" aria-labelledby="status-titulo">
                             <div class="pe-card-heading">
                                 <span class="pe-card-label">Leitura da palmilha</span>
                                 <span class="pe-status-dot" id="status-leitura">{{ leitura.status }}</span>
                             </div>
-                            <h2 id="status-titulo">Temperatura</h2>
-                            <p class="pe-status-description">Última temperatura recebida do dispositivo.</p>
+                            <h2 id="status-titulo">Temperaturas por região</h2>
+                            <p class="pe-status-description">Última leitura recebida de cada sensor NTC.</p>
                             <div class="pe-status-list">
-                                <div><i class="bi bi-thermometer-half"></i><span>Temperatura</span><strong id="valor-temperatura">{% if leitura.temperatura != '--' %}{{ '%.1f'|format(leitura.temperatura) }} °C{% else %}--{% endif %}</strong></div>
+                                <div><i class="bi bi-thermometer-half"></i><span>Dedão</span><strong id="sensor-dedao">{% if leitura.sensores.dedao != '--' %}{{ '%.1f'|format(leitura.sensores.dedao) }} °C{% else %}--{% endif %}</strong></div>
+                                <div><i class="bi bi-thermometer-half"></i><span>3º metatarso</span><strong id="sensor-metatarso-3">{% if leitura.sensores.metatarso_3 != '--' %}{{ '%.1f'|format(leitura.sensores.metatarso_3) }} °C{% else %}--{% endif %}</strong></div>
+                                <div><i class="bi bi-thermometer-half"></i><span>5º metatarso</span><strong id="sensor-metatarso-5">{% if leitura.sensores.metatarso_5 != '--' %}{{ '%.1f'|format(leitura.sensores.metatarso_5) }} °C{% else %}--{% endif %}</strong></div>
+                                <div><i class="bi bi-thermometer-half"></i><span>Meio do pé</span><strong id="sensor-meio-pe">{% if leitura.sensores.meio_pe != '--' %}{{ '%.1f'|format(leitura.sensores.meio_pe) }} °C{% else %}--{% endif %}</strong></div>
+                                <div><i class="bi bi-thermometer-half"></i><span>Calcanhar</span><strong id="sensor-calcanhar">{% if leitura.sensores.calcanhar != '--' %}{{ '%.1f'|format(leitura.sensores.calcanhar) }} °C{% else %}--{% endif %}</strong></div>
                             </div>
                         </aside>
                     </div>
@@ -61,9 +66,15 @@
 
 {% block scripts %}
     <script>
-        const valorTemperatura = document.getElementById('valor-temperatura');
         const horaTemperatura = document.getElementById('horaTemperatura');
         const statusLeitura = document.getElementById('status-leitura');
+        const camposSensores = {
+            dedao: document.getElementById('sensor-dedao'),
+            metatarso_3: document.getElementById('sensor-metatarso-3'),
+            metatarso_5: document.getElementById('sensor-metatarso-5'),
+            meio_pe: document.getElementById('sensor-meio-pe'),
+            calcanhar: document.getElementById('sensor-calcanhar'),
+        };
 
         async function atualizarTemperatura() {
             try {
@@ -71,10 +82,16 @@
                 if (!resposta.ok) return;
 
                 const leitura = await resposta.json();
-                const temperatura = Number(leitura.temperatura);
-                valorTemperatura.textContent = Number.isFinite(temperatura)
-                    ? `${temperatura.toFixed(1)} °C`
-                    : '--';
+                Object.entries(camposSensores).forEach(([sensor, campo]) => {
+                    let temperatura = leitura.sensores && leitura.sensores[sensor];
+                    if (sensor === 'dedao' && (temperatura === undefined || temperatura === null)) {
+                        temperatura = leitura.temperatura;
+                    }
+                    temperatura = Number(temperatura);
+                    campo.textContent = Number.isFinite(temperatura)
+                        ? `${temperatura.toFixed(1)} °C`
+                        : '--';
+                });
                 horaTemperatura.textContent = leitura.hora || '--';
                 statusLeitura.textContent = leitura.status || 'Aguardando leitura';
             } catch (erro) {

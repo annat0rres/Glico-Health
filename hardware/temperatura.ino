@@ -1,6 +1,6 @@
-#include <ESP8266WiFi.h> // permite a conexão a uma rede wi-fi
-#include <ESP8266HTTPClient.h> // pro esp fazer requisições HTTP
-#include <WiFiClientSecureBearSSL.h> // criptografa com TLS a conexao HTTP (pra ficar HTTPS)
+#include <WiFi.h> // permite a conexão a uma rede wi-fi
+#include <HTTPClient.h> // pro esp fazer requisições HTTP
+#include <WiFiClientSecure.h> // criptografa com TLS a conexao HTTP (pra ficar HTTPS)
 #include <math.h> // pra usar o log 
 
 // configurações da rede 
@@ -10,10 +10,28 @@
 const char* serverName = "https://glico-health.vercel.app/pediabetico";
 
 // pinos
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 48
+#endif
 const int pinoLED = LED_BUILTIN; // led embutido no esp
-const int pinoNTC = A0;          // pino analógico
+
+struct SensorNTC {
+  const char* id;
+  const char* nome;
+  int pino;
+};
+
+const SensorNTC sensores[] = {
+  {"dedao", "Dedão", 4},
+  {"metatarso_3", "3º metatarso", 6},
+  {"metatarso_5", "5º metatarso", 7},
+  {"meio_pe", "Meio do pé", 5},
+  {"calcanhar", "Calcanhar", 15}
+};
+const size_t quantidadeSensores = sizeof(sensores) / sizeof(sensores[0]);
 
 // configurações
+// Cada NTC fica entre o GPIO e o GND, com um resistor fixo de 100k entre 3V3 e o GPIO.
 const float resistor = 100000.0;  // resistencia do resistor (100KOhm)
 const float coef_beta = 3950.0;   // coeficiente beta do NTC
 const float resist_ntc = 100000.0;  // resistência do ntc em temperatura ambiente = resistência nominal 
@@ -22,12 +40,18 @@ const float temp_ambiente_kelvin = 298.15; // 25°C em Kelvin
 void setup() {
   Serial.begin(115200);
 
+  analogReadResolution(12);
+  for (size_t i = 0; i < quantidadeSensores; i++) {
+    pinMode(sensores[i].pino, INPUT);
+    analogSetPinAttenuation(sensores[i].pino, ADC_11db);
+  }
+
   // configura o led embutido
   pinMode(pinoLED, OUTPUT);
   digitalWrite(pinoLED, HIGH); 
 
   Serial.print("A conectar ao Wi-Fi...");
-  WiFi.begin(ssid, password);
+  WiFi.begin(SECRET_SSID, SECRET_PASS);
 
   // pra piscar o led enquanto tenta conectar
   while (WiFi.status() != WL_CONNECTED) {
@@ -42,11 +66,11 @@ void setup() {
   digitalWrite(pinoLED, LOW); // led aceso direto pra indicar q tá online
 }
 
-float lerTemperaturaNTC() {
-  int adcVal = analogRead(pinoNTC); // tensão no pino A0
-  if (adcVal == 0) return 0.0;
+bool lerTemperaturaNTC(int pino, float& temperatura) {
+  uint32_t tensaoMilliVolts = analogReadMilliVolts(pino); // tensão no pino analógico
+  if (tensaoMilliVolts == 0 || tensaoMilliVolts >= 3000) return false;
 
-  float vOut = (adcVal / 1023.0) * 3.3; // 1023 é o valor máximo da escala de leitura; 10 bits
+  float vOut = tensaoMilliVolts / 1000.0;
   float rNTC = resistor * (3.3 / vOut - 1.0);
 
   // equação de Steinhart-Hart / beta
@@ -58,35 +82,56 @@ float lerTemperaturaNTC() {
   steinhart = 1.0 / steinhart;        
   steinhart -= 273.15; // converte para Celsius
 
-  return steinhart;
+  if (!isfinite(steinhart)) return false;
+  temperatura = steinhart;
+  return true;
 }
 
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     // configura o cliente seguro para ignorar validação de SSL estrita da Vercel
-    std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
-    client->setInsecure();
+    WiFiClientSecure client;
+    client.setInsecure();
 
     HTTPClient http;
-    http.begin(*client, serverName);
+    http.begin(client, serverName);
     http.addHeader("Content-Type", "application/json");
 
-    float tempC = lerTemperaturaNTC();
+    float temperaturas[quantidadeSensores];
+    bool leituraValida = true;
+    for (size_t i = 0; i < quantidadeSensores; i++) {
+      if (!lerTemperaturaNTC(sensores[i].pino, temperaturas[i])) {
+        Serial.printf("Leitura inválida no sensor %s (GPIO %d)\n", sensores[i].nome, sensores[i].pino);
+        leituraValida = false;
+      }
+    }
 
-    // monta o payload em formato JSON
-    String jsonPayload = "{\"temperatura\":" + String(tempC, 2) + "}";
+    if (leituraValida) {
+      // monta o payload em formato JSON
+      String jsonPayload = "{\"temperatura\":" + String(temperaturas[0], 2) + ",\"sensores\":{";
+      for (size_t i = 0; i < quantidadeSensores; i++) {
+        if (i > 0) jsonPayload += ",";
+        jsonPayload += "\"" + String(sensores[i].id) + "\":" + String(temperaturas[i], 2);
+      }
+      jsonPayload += "}}";
 
-    // pisca rápido o led para avisar o momento do envio
-    digitalWrite(pinoLED, HIGH); // apaga rapidamente
-    delay(100);
-    digitalWrite(pinoLED, LOW);  // acende novamente
+      // pisca rápido o led para avisar o momento do envio
+      digitalWrite(pinoLED, HIGH); // apaga rapidamente
+      delay(100);
+      digitalWrite(pinoLED, LOW);  // acende novamente
 
-    int httpResponseCode = http.POST(jsonPayload);
+      int httpResponseCode = http.POST(jsonPayload);
 
-    if (httpResponseCode > 0) {
-      Serial.printf("Enviado com sucesso: %.2f °C | Código HTTP: %d\n", tempC, httpResponseCode);
+      if (httpResponseCode >= 200 && httpResponseCode < 300) {
+        Serial.printf("Cinco sensores enviados | Dedão: %.2f °C | Código HTTP: %d\n", temperaturas[0], httpResponseCode);
+      } else if (httpResponseCode > 0) {
+        String resposta = http.getString();
+        Serial.printf("Erro HTTP %d: %s\n", httpResponseCode, resposta.c_str());
+      } else {
+        Serial.printf("Erro ao enviar: %s\n", http.errorToString(httpResponseCode).c_str());
+      }
     } else {
-      Serial.printf("Erro ao enviar: %s\n", http.errorToString(httpResponseCode).c_str());
+      Serial.println("Envio cancelado: verifique as conexões dos sensores NTC.");
     }
     http.end();
   } else {
