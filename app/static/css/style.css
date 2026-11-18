@@ -1,6 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cal+Sans&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+.asw-widget .asw-menu-btn {
+    left: auto !important;
+    right: 20px !important;
+    bottom: 96px !important;
+    top: auto !important;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -14,18 +21,114 @@ body {
     overflow-x: hidden;
 }
 
-.alert-warning {
-    border-color: rgba(245, 204, 76, 0.5);
-    background-color: rgba(245, 204, 76, 0.28);
-    color: #655A7C;
+#inicio {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #f8f4fb;
+}
+
+#inicio > .luzesGradiente {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.manchaLuz {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: clamp(10rem, var(--tamanho, 20vw), 48rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(44px);
+    opacity: 0.12;
+    animation: piscarELocomover var(--duracao, 12s) ease-in-out var(--atraso, 0s) infinite;
+}
+
+.manchaLuz--rosa {
+    background: radial-gradient(circle, rgba(255, 160, 210, 0.62) 0%, rgba(232, 190, 242, 0.3) 42%, transparent 72%);
+}
+
+.manchaLuz--lilas {
+    background: radial-gradient(circle, rgba(163, 119, 205, 0.54) 0%, rgba(190, 161, 231, 0.28) 42%, transparent 72%);
+}
+
+.manchaLuz--clara {
+    background: radial-gradient(circle, rgba(248, 244, 251, 0.9) 0%, rgba(248, 244, 251, 0.55) 40%, transparent 76%);
+}
+
+.manchaLuz--amarela {
+    background: radial-gradient(circle, rgba(245, 204, 76, 0.58) 0%, rgba(255, 232, 150, 0.3) 42%, transparent 76%);
+}
+
+.manchaLuz--borda {
+    filter: blur(36px);
+}
+
+#inicioLogo,
+#btnAvancar {
+    z-index: 1;
+}
+
+@keyframes piscarELocomover {
+    0%, 100% {
+        transform: translate3d(var(--inicio-x), var(--inicio-y), 0) scale(0.78);
+        opacity: 0.08;
+    }
+
+    45% {
+        transform: translate3d(var(--destino-x), var(--destino-y), 0) scale(1.12);
+        opacity: 0.78;
+    }
+
+    70% {
+        transform: translate3d(var(--destino-x), var(--destino-y), 0) scale(0.92);
+        opacity: 0.18;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .manchaLuz {
+        animation: none;
+        opacity: 0.16;
+    }
 }
 
 #inicioLogo {
+    position: relative;
+    isolation: isolate;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+}
+
+#inicioLogo::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    width: clamp(16rem, 32vw, 30rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+        circle,
+        rgba(248, 244, 251, 0.82) 0%,
+        rgba(248, 244, 251, 0.56) 32%,
+        rgba(248, 244, 251, 0.18) 56%,
+        transparent 76%
+    );
+    pointer-events: none;
 }
 
 #inicioLogo h1 {
@@ -70,6 +173,12 @@ body {
 
 #avance:hover {
     transform: scale(1.05);
+}
+
+.alert-warning {
+    border-color: rgba(245, 204, 76, 0.5);
+    background-color: rgba(245, 204, 76, 0.28);
+    color: #655A7C;
 }
 
 #cadastro {
