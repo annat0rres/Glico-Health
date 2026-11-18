@@ -11,10 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const luzDeBorda = i >= 20;
             const luzAmarela = i >= 30;
             const tamanho = luzDeBorda
-                ? sortear(14, 26)
-                : i < 14
-                    ? sortear(12, 32)
-                    : sortear(32, 60);
+                ? luzAmarela
+                    ? sortear(24, 42)
+                    : i < 26
+                        ? sortear(34, 54)
+                        : sortear(20, 36)
+                : i < 8
+                    ? sortear(12, 24)
+                    : i < 14
+                        ? sortear(26, 42)
+                        : sortear(46, 68);
             let inicioX;
             let inicioY;
             let destinoX;

@@ -3,9 +3,19 @@
 
 .asw-widget .asw-menu-btn {
     left: auto !important;
-    right: 20px !important;
-    bottom: 96px !important;
-    top: auto !important;
+    right: 10px !important;
+    top: calc(50vh + 42px) !important;
+    bottom: auto !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+
+@media (max-width: 768px) {
+    .asw-widget .asw-menu-btn {
+        top: calc(50vh + 32px) !important;
+        width: 30px !important;
+        height: 30px !important;
+    }
 }
 
 * {
@@ -44,7 +54,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: clamp(10rem, var(--tamanho, 20vw), 48rem);
+    width: clamp(7rem, var(--tamanho, 20vw), 80rem);
     aspect-ratio: 1;
     border-radius: 50%;
     filter: blur(44px);
