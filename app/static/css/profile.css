@@ -4,17 +4,53 @@
 .asw-widget .asw-menu-btn {
   left: auto !important;
   right: 10px !important;
-  top: calc(50vh + 42px) !important;
-  bottom: auto !important;
+  top: auto !important;
+  bottom: 1.25rem !important;
   width: 40px !important;
   height: 40px !important;
 }
 
+[vw],
+[vw-access-button],
+[vw-plugin-wrapper],
+div[vw] {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 5.25rem !important;
+}
+
+[vw-access-button] {
+  left: auto !important;
+  right: 10px !important;
+}
+
+#vlibras-access-wrapper {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 5.25rem !important;
+  right: 10px !important;
+  left: auto !important;
+  z-index: 1000 !important;
+}
+
+#vlibras-access-wrapper > div,
+#vlibras-access-wrapper [class*="access"] {
+  position: relative !important;
+  bottom: auto !important;
+}
+
 @media (max-width: 768px) {
   .asw-widget .asw-menu-btn {
-    top: calc(50vh + 32px) !important;
+    top: auto !important;
+    bottom: 1rem !important;
     width: 30px !important;
     height: 30px !important;
+  }
+
+  [vw],
+  [vw-access-button],
+  div[vw] {
+    bottom: 4.75rem !important;
   }
 }
 

@@ -101,10 +101,15 @@
                 <i class="bi bi-calendar2-check" aria-hidden="true"></i>
               </div>
               <div id="lista-marcacoes" class="lista-marcacoes"></div>
-              <button id="adicionar-marcacao" class="btn-adicionar-marcacao" type="button">
-                <i class="bi bi-plus-lg" aria-hidden="true"></i>
-                Adicionar
-              </button>
+              <div class="acoes-dia-marcacao">
+                <button id="adicionar-marcacao" class="btn-adicionar-marcacao" type="button">
+                  <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                  Adicionar
+                </button>
+                <button id="cancelar-dia-marcacao" class="btn-cancelar-dia-marcacao" type="button">
+                  Cancelar
+                </button>
+              </div>
             </div>
             <form id="novo-registro" class="novo-registro d-none" method="POST" action="{{ url_for('criar_evento_calendario') }}"
               data-create-url="{{ url_for('criar_evento_calendario') }}"

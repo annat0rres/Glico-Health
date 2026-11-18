@@ -5,7 +5,7 @@
     left: auto !important;
     right: 10px !important;
     top: calc(50vh + 42px) !important;
-    bottom: auto !important;
+    bottom: 1.25rem !important;
     width: 40px !important;
     height: 40px !important;
 }
@@ -867,4 +867,36 @@ input:checked + .slider:before {
     font-family: "Poppins", sans-serif;
     font-size: 14px;
     outline: none;
+}
+
+[vw],
+[vw-access-button],
+[vw-plugin-wrapper],
+div[vw],
+#vlibras,
+.vlibras,
+.vlibras-widget {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 5.25rem !important;
+}
+
+[vw-access-button] {
+    left: auto !important;
+    right: 10px !important;
+}
+
+#vlibras-access-wrapper {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 5.25rem !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+}
+
+#vlibras-access-wrapper > div,
+#vlibras-access-wrapper [class*="access"] {
+    position: relative !important;
+    bottom: auto !important;
 }

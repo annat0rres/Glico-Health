@@ -1,5 +1,4 @@
-
-  const ctx = document.getElementById('graficoNivelGlicemico').getContext('2d');
+const ctx = document.getElementById('graficoNivelGlicemico').getContext('2d');
 
   const gradient = ctx.createLinearGradient(0, 0, 0, 180);
   gradient.addColorStop(0, 'rgba(255, 188, 220, 0.6)');
@@ -70,7 +69,11 @@
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#8d829e', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(226, 232, 240, 0.6)' }, ticks: { color: '#8d829e', font: { size: 11 } } }
+        y: {
+          grid: { color: 'rgba(226, 232, 240, 0.6)' },
+          ticks: { color: '#8d829e', font: { size: 11 } },
+          title: { display: true, text: 'mg/dL', color: '#8d829e', font: { size: 10 } }
+        }
       }
     }
   });

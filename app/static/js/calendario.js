@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const newEntryEl = document.getElementById('novo-registro');
     const newDateEl = document.getElementById('nova-data');
     const cancelEntryEl = document.getElementById('cancelar-registro');
+    const cancelDayDetailsEl = document.getElementById('cancelar-dia-marcacao');
     const formTitleEl = document.getElementById('form-titulo');
     const formIconEl = document.getElementById('form-icone');
     const saveEntryEl = document.getElementById('salvar-registro');
@@ -180,6 +181,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     cancelEntryEl.addEventListener('click', () => {
         newEntryEl.reset();
+        newEntryEl.classList.add('d-none');
+        detailsViewEl.classList.remove('d-none');
+    });
+
+    cancelDayDetailsEl.addEventListener('click', () => {
+        detailsEl.classList.add('d-none');
         newEntryEl.classList.add('d-none');
         detailsViewEl.classList.remove('d-none');
     });
