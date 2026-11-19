@@ -371,8 +371,8 @@ body {
 }
 
 /* Ajuste dos ícones dentro dos parágrafos ou divs dos inputs */
-#cadastro form p i,
-#cadastroQuest form p i,
+#cadastro form p > i,
+#cadastroQuest form p > i,
 #cadastroQuest form .mb-3 i {
     position: absolute !important;
     left: 18px !important;
@@ -540,6 +540,12 @@ body {
     color: #655A7C !important;
     outline: none !important;
     box-sizing: border-box !important;
+}
+
+#cadastro .campoLogin input[type="text"],
+#cadastro .campoLogin input[type="email"],
+#cadastro .campoLogin input[type="password"] {
+    padding-right: 48px !important;
 }
 
 .campoLogin input::placeholder {

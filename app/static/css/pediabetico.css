@@ -274,6 +274,39 @@ body {
   font-weight: 600;
 }
 
+.pe-paused {
+  display: flex;
+  min-height: calc(100vh - 8rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.pe-paused-logo {
+  display: block;
+  width: min(190px, 48vw);
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.pe-paused h1 {
+  max-width: 620px;
+  margin: 0 0 0.75rem;
+  color: var(--pe-text);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.pe-paused p {
+  max-width: 560px;
+  margin: 0;
+  color: #756a80;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
 .pe-sync-feedback {
   min-height: 1.2rem;
   margin: 1.25rem 0 0;

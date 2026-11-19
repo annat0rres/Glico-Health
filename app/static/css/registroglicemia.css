@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background: var(--registro-background);
-  color: #ffffff;
+  color: #302d33;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -40,40 +40,45 @@ body {
 .registro-main {
   display: flex;
   justify-content: center;
-  padding: 0.8rem 1rem 2rem;
+  align-items: center;
+  min-height: calc(100vh - 104px);
+  padding: 1.5rem 1rem 2rem;
 }
 
 .registro-card {
-  width: min(100%, 360px);
-  padding: 1.25rem 1.35rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  border-radius: 14px;
-  background: linear-gradient(145deg, #a481a4 0%, var(--registro-purple) 100%);
-  box-shadow: 0 4px 8px rgba(101, 90, 124, 0.3);
+  width: min(100%, 900px);
+  padding: 2rem 2.25rem 2.25rem;
+  border: 1px solid rgba(128, 103, 140, 0.14);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(101, 90, 124, 0.08);
 }
 
 .registro-heading {
-  margin-bottom: 1.25rem;
-  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #eee8f0;
+  text-align: left;
 }
 
 .registro-heading h1 {
   margin: 0;
-  font-size: 1.05rem;
+  color: var(--registro-purple-dark);
+  font-size: 1.75rem;
   font-weight: 700;
 }
 
 .registro-heading p {
-  margin: 0.05rem 0 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.72rem;
-  font-weight: 600;
+  margin: 0.35rem 0 0;
+  color: #77717b;
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .registro-form {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1.5rem 1.75rem;
 }
 
 .registro-field {
@@ -83,28 +88,30 @@ body {
 }
 
 .registro-field label {
-  font-size: 0.75rem;
+  color: var(--registro-purple-dark);
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
 .registro-field input,
 .registro-field select {
   width: 100%;
-  min-height: 42px;
+  min-height: 50px;
   padding: 0.55rem 0.8rem;
-  border: 0;
-  border-radius: 999px;
+  border: 1px solid rgba(128, 103, 140, 0.35);
+  border-radius: 8px;
   outline: none;
-  background: var(--registro-input);
-  box-shadow: 0 3px 5px rgba(68, 48, 80, 0.18);
-  color: #756483;
+  background: #ffffff;
+  box-shadow: none;
+  color: #403b43;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
 }
 
 .registro-field input:focus,
 .registro-field select:focus {
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+  border-color: var(--registro-purple);
+  box-shadow: 0 0 0 3px rgba(128, 103, 140, 0.16);
 }
 
 .registro-select-wrapper {
@@ -122,8 +129,8 @@ body {
 }
 
 .registro-select-wrapper:focus-within {
-  border-radius: 999px;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(128, 103, 140, 0.16);
 }
 
 .registro-select-wrapper .registro-select-icon {
@@ -131,7 +138,7 @@ body {
   top: 50%;
   right: 1rem;
   transform: translateY(-50%);
-  color: #756483;
+  color: var(--registro-purple);
   font-size: 0.95rem;
   pointer-events: none;
 }
@@ -143,11 +150,12 @@ body {
 .glicemia-input-wrapper {
   display: flex;
   align-items: center;
-  min-height: 42px;
+  min-height: 50px;
   padding: 0.55rem 0.8rem;
-  border-radius: 999px;
-  background: var(--registro-input);
-  box-shadow: 0 3px 5px rgba(68, 48, 80, 0.18);
+  border: 1px solid rgba(128, 103, 140, 0.35);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: none;
 }
 
 .glicemia-input-wrapper input {
@@ -162,16 +170,17 @@ body {
   box-shadow: none;
 }
 
-.glicemia-unit {
-  display: none;
-  margin-left: 0.35rem;
-  color: #756483;
-  font-size: 0.72rem;
-  white-space: nowrap;
+.glicemia-input-wrapper:focus-within {
+  border-color: var(--registro-purple);
+  box-shadow: 0 0 0 3px rgba(128, 103, 140, 0.16);
 }
 
-.glicemia-input-wrapper.has-value .glicemia-unit {
+.glicemia-unit {
   display: inline;
+  margin-left: 0.35rem;
+  color: var(--registro-purple);
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .registro-field input[type="date"]::-webkit-calendar-picker-indicator,
@@ -182,27 +191,28 @@ body {
 
 .registro-field small {
   margin-top: -0.12rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.69rem;
+  color: var(--registro-purple);
+  font-size: 0.78rem;
 }
 
 .registro-submit {
-  align-self: center;
-  min-width: 84px;
-  margin-top: 0.55rem;
-  padding: 0.35rem 1rem;
-  border: 1px solid #ffffff;
-  border-radius: 999px;
-  background: transparent;
+  justify-self: end;
+  min-width: 140px;
+  min-height: 46px;
+  margin-top: 0.25rem;
+  padding: 0.6rem 1.25rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--registro-purple-dark);
   color: #ffffff;
   font: inherit;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .registro-submit:hover,
 .registro-submit:focus-visible {
-  background: rgba(255, 255, 255, 0.18);
+  background: #514866;
 }
 
 .offcanvas {
@@ -239,142 +249,37 @@ body {
   font-size: 0.6rem !important;
 }
 
-/* deixando mais centralizado */
-@media (max-width: 991.98px) {
+@media (max-width: 767.98px) {
   .registro-main {
-    align-items: center;
-    min-height: calc(100vh - 104px);
-    padding-top: 0.5rem;
-    padding-bottom: 1.5rem;
+    padding: 0.75rem 1rem 1.5rem;
   }
 
   .registro-card {
-    width: min(92vw, 390px);
-    padding: 1.5rem 1.5rem 1.75rem;
-  }
-}
-
-@media (min-width: 992px) {
-  body {
-    background-color: #f5f5f9 !important;
-    color: #302d33;
-  }
-
-  .registro-main {
-    display: block;
-    padding: 1.5rem 1rem 2rem;
-  }
-
-  .registro-card {
-    width: min(100%, 1280px);
-    padding: 2rem 2.25rem 2.25rem;
-    border: 1px solid rgba(128, 103, 140, 0.14);
-    border-radius: 10px;
-    background: #ffffff;
-    box-shadow: 0 8px 24px rgba(101, 90, 124, 0.08);
-  }
-
-  .registro-heading {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid #eee8f0;
-    text-align: left;
+    padding: 1.35rem 1.1rem 1.5rem;
   }
 
   .registro-heading h1 {
-    color: var(--registro-purple-dark);
-    font-size: 1.75rem;
+    font-size: 1.4rem;
   }
 
-  .registro-heading p {
-    margin-top: 0.35rem;
-    color: #77717b;
-    font-size: 0.9rem;
-    font-weight: 400;
+  .registro-form {
+    gap: 1rem;
   }
 
+  .registro-submit {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
   .registro-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: min(100%, 960px);
     align-items: start;
-    gap: 1.5rem 1.75rem;
-  }
-
-  .registro-field {
-    gap: 0.5rem;
-  }
-
-  .registro-field label {
-    color: var(--registro-purple-dark);
-    font-size: 0.9rem;
-  }
-
-  .registro-field input,
-  .registro-field select,
-  .glicemia-input-wrapper {
-    min-height: 50px;
-    border: 1px solid rgba(128, 103, 140, 0.35);
-    border-radius: 8px;
-    background: var(--registro-input);
-    box-shadow: none;
-    color: #403b43;
-    font-size: 0.9rem;
-  }
-
-  .registro-field input:focus,
-  .registro-field select:focus,
-  .registro-select-wrapper:focus-within {
-    border-color: var(--registro-purple);
-    box-shadow: 0 0 0 3px rgba(128, 103, 140, 0.16);
-  }
-
-  .registro-select-wrapper select:focus {
-    box-shadow: none;
-  }
-
-  .registro-field small {
-    color: var(--registro-purple);
-    font-size: 0.78rem;
-  }
-
-  .glicemia-input-wrapper {
-    padding: 0.55rem 0.8rem;
-  }
-
-  .glicemia-input-wrapper input {
-    min-height: auto;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .glicemia-input-wrapper input:focus {
-    box-shadow: none;
-  }
-
-  .glicemia-unit {
-    color: var(--registro-purple);
-    font-size: 0.85rem;
   }
 
   .registro-submit {
     grid-column: 1 / -1;
-    justify-self: end;
-    min-width: 140px;
-    min-height: 46px;
-    margin-top: 0.25rem;
-    padding: 0.6rem 1.25rem;
-    border: 0;
-    border-radius: 8px;
-    background: var(--registro-purple-dark);
-    color: #ffffff;
-    font-size: 0.9rem;
-  }
-
-  .registro-submit:hover,
-  .registro-submit:focus-visible {
-    background: #514866;
   }
 }

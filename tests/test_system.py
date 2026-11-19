@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from sqlalchemy.dialects.mysql import LONGBLOB, TINYINT
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.compiler import compiles
 from werkzeug.security import generate_password_hash
 
@@ -699,6 +700,34 @@ class TestesDeSistema(unittest.TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertEqual(resposta.get_json()["temperatura"], 37.1)
 
+    def test_busca_itr_oculta_leituras_enquanto_pe_diabetico_bloqueado(self):
+        with patch.object(db.session, "scalars") as buscar_leituras:
+            resultado = routes._buscar_itr_diario()
+
+        self.assertEqual(len(resultado), 7)
+        self.assertTrue(all(dia["itr"] is None for dia in resultado))
+        buscar_leituras.assert_not_called()
+
+        erro_tabela_ausente = ProgrammingError(
+            "SELECT leitura_temperatura", {}, Exception(1146, "Table doesn't exist")
+        )
+        with patch.object(routes, "PE_DIABETICO_BLOQUEADO", False), patch.object(
+            db.session, "scalars", side_effect=erro_tabela_ausente
+        ), patch.object(db.session, "rollback") as rollback:
+            resultado = routes._buscar_itr_diario()
+
+        self.assertTrue(all(dia["itr"] is None for dia in resultado))
+        rollback.assert_called_once_with()
+
+        erro_coluna_ausente = ProgrammingError(
+            "SELECT leitura_temperatura", {}, Exception(1054, "Unknown column")
+        )
+        with patch.object(routes, "PE_DIABETICO_BLOQUEADO", False), patch.object(
+            db.session, "scalars", side_effect=erro_coluna_ausente
+        ):
+            with self.assertRaises(ProgrammingError):
+                routes._buscar_itr_diario()
+
     def test_envio_de_temperatura_salva_leitura_e_atualiza_status(self):
         resposta = self.client.post(
             "/pediabetico",
@@ -720,7 +749,7 @@ class TestesDeSistema(unittest.TestCase):
             "Leitura recebida",
         )
 
-    def test_envio_dos_cinco_sensores_atualiza_a_pagina(self):
+    def test_envio_dos_cinco_sensores_preserva_leituras_com_pagina_bloqueada(self):
         sensores = {
             "dedao": 36.1,
             "metatarso_3": 36.2,
@@ -737,15 +766,8 @@ class TestesDeSistema(unittest.TestCase):
         self.assertEqual(leitura["sensores"], sensores)
 
         pagina = self.client.get("/pediabetico").get_data(as_text=True)
-        for campo in (
-            "sensor-dedao",
-            "sensor-metatarso-3",
-            "sensor-metatarso-5",
-            "sensor-meio-pe",
-            "sensor-calcanhar",
-        ):
-            self.assertIn(campo, pagina)
-        self.assertIn("36.5 °C", pagina)
+        self.assertIn("Pé diabético temporariamente indisponível", pagina)
+        self.assertNotIn("sensor-dedao", pagina)
 
         with app.app_context():
             leitura_salva = db.session.query(LeituraTemperatura).one()
@@ -759,7 +781,7 @@ class TestesDeSistema(unittest.TestCase):
         resposta_itr = self.client.get("/home/itr-atualizar")
         self.assertEqual(resposta_itr.status_code, 200)
         itr_hoje = resposta_itr.get_json()[-1]["itr"]
-        self.assertEqual(itr_hoje, 0.4)
+        self.assertIsNone(itr_hoje)
 
     def test_envio_dos_sensores_rejeita_leitura_incompleta(self):
         leituras_invalidas = (

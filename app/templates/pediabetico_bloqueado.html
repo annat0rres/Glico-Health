@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Pé diabético - GlicoHealth{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pediabetico.css') }}">
+{% endblock %}
+
+{% block content %}
+    <main class="col-12 col-lg-10 pe-lg-4 pe-xl-5">
+        <section class="pe-paused" aria-labelledby="pe-pausado-titulo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo GlicoHealth" class="pe-paused-logo">
+            <h1 id="pe-pausado-titulo">Pé diabético temporariamente indisponível</h1>
+            <p>Essa funcionalidade depende do nosso protótipo físico que não faz parte dessa avaliação de usabilidade. Você pode continuar explorando o restante do site. </p>
+        </section>
+    </main>
+{% endblock %}

@@ -15,8 +15,10 @@ from datetime import datetime, timedelta, timezone
 import math
 from flask import request, jsonify
 from sqlalchemy import func, select
+from sqlalchemy.exc import ProgrammingError
 
 # guarda em memória os dados mais recentes para a interface de acompanhamento
+PE_DIABETICO_BLOQUEADO = True
 SENSORES_PE = {
     "dedao": "Dedão",
     "metatarso_3": "3º metatarso",
@@ -102,16 +104,26 @@ def _calcular_itr_diario(leituras, hoje):
 
 def _buscar_itr_diario():
     hoje = datetime.now(FUSO_BRASILIA).date()
+    if PE_DIABETICO_BLOQUEADO:
+        return _calcular_itr_diario([], hoje)
+
     inicio_periodo = datetime.combine(hoje - timedelta(days=6), time.min)
     fim_periodo = datetime.combine(hoje + timedelta(days=1), time.min)
-    leituras_temperatura = db.session.scalars(
-        select(LeituraTemperatura)
-        .where(
-            LeituraTemperatura.data_hora >= inicio_periodo,
-            LeituraTemperatura.data_hora < fim_periodo,
-        )
-        .order_by(LeituraTemperatura.data_hora)
-    ).all()
+    try:
+        leituras_temperatura = db.session.scalars(
+            select(LeituraTemperatura)
+            .where(
+                LeituraTemperatura.data_hora >= inicio_periodo,
+                LeituraTemperatura.data_hora < fim_periodo,
+            )
+            .order_by(LeituraTemperatura.data_hora)
+        ).all()
+    except ProgrammingError as error:
+        codigo_erro = getattr(error.orig, "args", (None,))[0]
+        if codigo_erro != 1146:
+            raise
+        db.session.rollback()
+        return _calcular_itr_diario([], hoje)
     return _calcular_itr_diario(leituras_temperatura, hoje)
 
 
@@ -323,6 +335,9 @@ def pediabetico():
 
         _registrar_leitura_temperatura(temperatura, sensores)
         return jsonify(sucesso=True), 200
+
+    if PE_DIABETICO_BLOQUEADO:
+        return render_template("pediabetico_bloqueado.html")
 
     return render_template(
         "pediabetico.html",
